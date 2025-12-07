@@ -16,7 +16,7 @@
     "imagekit": "^6.0.0",
     "jose": "^6.1.0",
     "lucide-react": "^0.541.0",
-    "next": "15.5.3",
+    "next": "15.5.7",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "use-debounce": "^10.0.4"
@@ -29,7 +29,7 @@
     "@tailwindcss/postcss": "^4",
     "tailwindcss": "^4",
     "eslint": "^9",
-    "eslint-config-next": "15.5.3",
+    "eslint-config-next": "15.5.7",
     "@eslint/eslintrc": "^3",
     "prisma": "^6.9.0"
   }
