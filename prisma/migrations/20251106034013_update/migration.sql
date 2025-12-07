@@ -40,7 +40,7 @@ CREATE TABLE `students` (
     `child_order` INTEGER NULL,
     `imageUrl` VARCHAR(191) NULL,
     `status` VARCHAR(191) NULL,
-    `academic_year` VARCHAR(191) NOT NULL,
+    `academic_year_id` VARCHAR(191) NULL,
     `admitted_at` DATETIME(3) NULL,
     `classId` VARCHAR(191) NOT NULL,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
@@ -110,8 +110,8 @@ CREATE TABLE `development_assessments` (
     `development` ENUM('BAIK', 'CUKUP', 'PERLU_DILATIH') NOT NULL DEFAULT 'BAIK',
     `notes` TEXT NULL,
     `assessment_date` DATETIME(3) NULL,
-    `semester` INTEGER NOT NULL DEFAULT 1,
-    `academic_year` VARCHAR(191) NOT NULL DEFAULT '2024/2025',
+    `semester` ENUM('SEMESTER_1', 'SEMESTER_2') NOT NULL DEFAULT 'SEMESTER_1',
+    `academic_year` VARCHAR(191) NOT NULL,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
     `deleted_at` DATETIME(3) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -121,6 +121,8 @@ CREATE TABLE `development_assessments` (
     INDEX `idx_dev_assessment_student`(`studentId`),
     INDEX `idx_dev_assessment_indicator`(`indicatorId`),
     INDEX `idx_dev_assessment_semester`(`semester`),
+    INDEX `idx_dev_assessment_academic_year`(`academic_year`),
+    INDEX `idx_student_period`(`studentId`, `academic_year`, `semester`),
     UNIQUE INDEX `unique_student_indicator_semester_year`(`studentId`, `indicatorId`, `semester`, `academic_year`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -162,6 +164,23 @@ CREATE TABLE `teacher_notes` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `academic_years` (
+    `id` VARCHAR(191) NOT NULL,
+    `year` VARCHAR(191) NOT NULL,
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+    `deleted_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `academic_years_id_key`(`id`),
+    UNIQUE INDEX `academic_years_year_key`(`year`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `students` ADD CONSTRAINT `students_academic_year_id_fkey` FOREIGN KEY (`academic_year_id`) REFERENCES `academic_years`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
 -- AddForeignKey
 ALTER TABLE `students` ADD CONSTRAINT `students_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `classes`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -172,10 +191,13 @@ ALTER TABLE `classes` ADD CONSTRAINT `classes_teacherId_fkey` FOREIGN KEY (`teac
 ALTER TABLE `development_indicators` ADD CONSTRAINT `development_indicators_aspectId_fkey` FOREIGN KEY (`aspectId`) REFERENCES `development_aspects`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `development_assessments` ADD CONSTRAINT `dev_assessment_student_fk` FOREIGN KEY (`studentId`) REFERENCES `students`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `development_assessments` ADD CONSTRAINT `dev_assessment_student_fk` FOREIGN KEY (`studentId`) REFERENCES `students`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `development_assessments` ADD CONSTRAINT `dev_assessment_indicator_fk` FOREIGN KEY (`indicatorId`) REFERENCES `development_indicators`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `development_assessments` ADD CONSTRAINT `dev_assessment_academic_year_fk` FOREIGN KEY (`academic_year`) REFERENCES `academic_years`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `physical_developments` ADD CONSTRAINT `physical_developments_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `students`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
